@@ -1,12 +1,19 @@
 from django.shortcuts import render
 from rest_framework import permissions
 from rest_framework import viewsets
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+from drf_multiple_model.viewsets import ObjectMultipleModelAPIViewSet
 from  .models import Manufacturer,DisplayPlace,Car,Bike, Custom
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import ManufacturerSerializer, DisplayPlaceSerializer, CarSerializer, BikeSerializer, CustomSerializer
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class ManufacturerViewset(viewsets.ModelViewSet):
     serializer_class = ManufacturerSerializer
@@ -25,6 +32,7 @@ class DisplayPlaceViewset(viewsets.ModelViewSet):
     ordering_fields = ['area', 'id']
     search_fields = ['area', 'id']
     queryset = DisplayPlace.objects.all()
+
 
 class CarViewset(viewsets.ModelViewSet):
     serializer_class = CarSerializer
@@ -53,3 +61,25 @@ class CustomViewset(viewsets.ModelViewSet):
     ordering_fields = ['model_name', 'model_num', 'color', 'gears']
     search_fields = ['model_name', 'model_num', 'color', 'gears']
     queryset = Custom.objects.all()
+
+
+class MultiViewset(ObjectMultipleModelAPIViewSet):
+
+    querylist = [
+        {
+            'queryset': Manufacturer.objects.all(),
+            'serializer_class': ManufacturerSerializer,
+        },
+        {
+            'queryset': DisplayPlace.objects.all(),
+            'serializer_class': DisplayPlaceSerializer,
+        },
+        {
+            'queryset': Custom.objects.all(),
+            'serializer_class': CustomSerializer,
+        }
+    ]
+
+    @method_decorator(cache_page(CACHE_TTL))
+    def dispatch(self, *args, **kwargs):
+        return super(MultiViewset, self).dispatch(*args, **kwargs)

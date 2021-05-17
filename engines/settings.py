@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-zm^5jbqs!y3@p1*s7ju)wl*$+miq_)*_sco=t@%n_&blyd1f=_'
+
+KEY = 'I6Y4fjVy7xdSrbjK5eKYQwDed5l0-MbGx29xvS1nEKQ='
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,25 +40,36 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'vehicles',
     'rest_framework',
     'django_extensions',
     'django_filters',
     'rest_framework.authtoken',
-    'rest_auth'
+    'drf_multiple_model',
+    'rest_auth',
+    'cacheops'
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3,
-     'DEFAULT_AUTHENTICATION_CLASSES': [
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    #'PAGE_SIZE': 3,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
 
+INTERNAL_IPS = [
+
+    '127.0.0.1',
+
+]
+CACHE_TTL = 60 * 60
+
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +77,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'vehicles.middlewares.CustomMiddleware'
+
 ]
 
 ROOT_URLCONF = 'engines.urls'
@@ -85,7 +102,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'engines.wsgi.application'
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+    }
+}
+CACHEOPS_REDIS = "redis://localhost:6379/1"
 
+CACHEOPS_DEFAULTS = {
+    'timeout': 60*60
+}
+CACHEOPS = {
+    'vehicles.displayplace': {'ops': 'all'},
+    'vehicles.manufacturer': {'ops': 'all'},
+    'vehicles.custom': {'ops': 'all'},
+
+}
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -138,6 +174,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
