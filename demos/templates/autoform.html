@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+     <h3>Transfer Form</h3>
+     <form id="form" method="POST">
+         <input id="acc_name" type="text" name="accn">
+         <input id="acc_no" type="number" name="acc">
+         <input id="money" type="number" name="money">
+         <input  type="submit" name="submit" value="submit">
+      </form>
+      <div id="output">
+      </div>
+      <script>
+         $('#form').on('submit', function(e){
+
+         e.preventDefault();
+
+           $.ajax({
+                type : "POST",
+                url: "{% url 'auto_send' %}",
+                data: {
+                 acc_name : $('#acc_name').val(),
+                 acc_no : $('#acc_no').val(),
+                 money : $('#money').val(),
+                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                 dataType: "json",
+
+                },
+            });
+                 });
+      </script>
+</body>
+</html>

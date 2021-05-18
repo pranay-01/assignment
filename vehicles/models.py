@@ -100,3 +100,21 @@ class Custom(Vehicle):
 @receiver(post_delete, sender= Custom)
 def clear_cache(sender, instance, **kwargs):
     cache.clear()
+
+
+
+
+class Place(models.Model):
+    name = models.CharField(max_length=20)
+    star = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return self.name
+
+class Restaurant(Place):
+
+    serve_pizza = models.BooleanField(default=False)
+    serve_noodles = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
