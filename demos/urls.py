@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .views import formview ,Autoview, Auto_send
+from .views import formview ,Autoview, Auto_send, SampleView
 
 router = DefaultRouter()
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path('csrf/', formview),
     path('auto/', Autoview),
     path('auto_send/', Auto_send, name= 'auto_send'),
+    path('sample/', SampleView)
 ]

@@ -10,3 +10,11 @@ class Bank(models.Model):
 
     def __str__(self):
         return self.acc_name
+
+
+class Sample(models.Model):
+
+    exp = models.CharField(max_length=150)
+
+    def __str__(self):
+        return self.exp

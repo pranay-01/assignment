@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 
 
 class AutoTime(models.Model):
@@ -25,7 +26,6 @@ class Vehicle(AutoTime):
 
     def __str__(self):
         return self.model_name
-
 
 class Manufacturer(AutoTime):
     name = models.CharField(max_length=50, unique=True)
@@ -84,6 +84,16 @@ class Bike(Vehicle):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     manufacturer = models.ManyToManyField(Manufacturer)
     tubeless_tyres = models.BooleanField()
+
+
+    def clean(self):
+        if(self.gears > 6):
+            raise ValidationError("Bike with these many gears does not exist")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        super(Bike, self).save(*args, **kwargs)
 
 
 class Custom(Vehicle):

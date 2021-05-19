@@ -1,5 +1,6 @@
 from cryptography.fernet import Fernet
 from django.utils.deprecation import MiddlewareMixin
+from .serializers import SampleSerializer
 from engines.settings import KEY
 import json
 
@@ -9,27 +10,33 @@ class CustomMiddleware(MiddlewareMixin):
     def process_request(self, request):
 
         WHITE_LIST = [
-            "/vehicles/",
-            "/vehicles/displayplaces/"
+            "/demos/sample/",
         ]
 
         if request.method == 'POST' and request.path in WHITE_LIST:
             kf = Fernet(KEY)
-           # print(request.META['CONTENT_TYPE'])
-            data = request.POST
-            print(request.POST.get("area"))
+           # samp = SampleSerializer(data=request.data)
+            #print(request.initial_data['sample'])
+            print(request.path)
             #enc = kf.encrypt(data)
             #print(enc)
-
+        return None
+'''
         if request.method == 'GET':
             if request.path in WHITE_LIST:
                 print(request.path + "  this is the path")
             else:
                 print("no not you")
         return None
-'''
+
     def process_response(self, request, response):
 
         print(response)
         return response
+        
+        
+        
+    {
+      "data" : [ { "fun" : "chikita"}]
+    }
 '''
