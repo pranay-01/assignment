@@ -25,6 +25,8 @@ SECRET_KEY = 'django-insecure-zm^5jbqs!y3@p1*s7ju)wl*$+miq_)*_sco=t@%n_&blyd1f=_
 
 KEY = 'I6Y4fjVy7xdSrbjK5eKYQwDed5l0-MbGx29xvS1nEKQ='
 
+SECRET = 'idontknow'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -53,6 +55,10 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     #'PAGE_SIZE': 3,
@@ -71,17 +77,17 @@ CACHE_TTL = 60 * 60
 
 MIDDLEWARE = [
 
-
+    #'demos.middleware.CustomTop',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    #'demos.middleware.CustomMiddle',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-     #'demos.middleware.CustomMiddleware',
-
+    #'demos.middleware.CustomBottom',
 
 ]
 
@@ -116,9 +122,11 @@ CACHES = {
 }
 CACHEOPS_REDIS = "redis://localhost:6379/1"
 
+
 CACHEOPS_DEFAULTS = {
     'timeout': 60*60
 }
+
 CACHEOPS = {
     'vehicles.displayplace': {'ops': 'all'},
     'vehicles.manufacturer': {'ops': 'all'},

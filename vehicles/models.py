@@ -27,10 +27,10 @@ class Vehicle(AutoTime):
     def __str__(self):
         return self.model_name
 
+
 class Manufacturer(AutoTime):
     name = models.CharField(max_length=50, unique=True)
     origin = models.CharField(max_length=25)
-    logo = models.ImageField(null=True, blank=True)
 
     class Meta:
         ordering = ('id',)
@@ -96,8 +96,10 @@ class Bike(Vehicle):
         super(Bike, self).save(*args, **kwargs)
 
 
+
 class Custom(Vehicle):
     inspired = models.ForeignKey(Car, on_delete=models.CASCADE)
+
 
 
 
@@ -126,5 +128,8 @@ class Restaurant(Place):
     serve_pizza = models.BooleanField(default=False)
     serve_noodles = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
+
+
+class Street(Place):
+
+    houses = models.PositiveSmallIntegerField()

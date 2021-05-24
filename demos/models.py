@@ -1,5 +1,7 @@
 from django.db import models
-# Create your models here.
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
+
 
 
 class Bank(models.Model):
@@ -18,3 +20,33 @@ class Sample(models.Model):
 
     def __str__(self):
         return self.exp
+
+
+class DemoModel(models.Model):
+
+    txt = models.CharField(max_length=150)
+
+    class Meta:
+        indexes = [models.Index(fields=['txt', ])]
+
+    def __str__(self):
+        return self.txt
+
+    def del_mesg(sender, **kwargs):
+        print('OOPS, Object DELEted')
+
+post_delete.connect(sender=DemoModel, receiver=DemoModel.del_mesg)
+
+
+
+class FileUpload(models.Model):
+    file = models.FileField(upload_to='media/')
+
+
+
+
+'''
+    class Meta:
+        indexes =[ models.Index(fields=['exp'])
+        ]
+'''
