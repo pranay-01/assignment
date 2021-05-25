@@ -36,7 +36,7 @@ class OwnerViewset(viewsets.ModelViewSet):
 
 class ManufacturerViewset(viewsets.ModelViewSet):
     serializer_class = ManufacturerSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [permissions.IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['name', 'origin', 'id']
     ordering_fields = ['name', 'origin','id']

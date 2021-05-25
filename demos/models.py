@@ -27,7 +27,7 @@ class DemoModel(models.Model):
     txt = models.CharField(max_length=150)
 
     class Meta:
-        indexes = [models.Index(fields=['txt', ])]
+        indexes = [models.Index(fields=['txt',])]
 
     def __str__(self):
         return self.txt

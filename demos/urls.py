@@ -18,7 +18,7 @@ urlpatterns = [
     path('rest-auth/', include('rest_auth.urls')),
     path('csrf/', Formview),
     path('auto/', Autoview),
-    path('auto_send/', Auto_send, name= 'auto_send'),
+    path('auto_send/', Auto_send, name='auto_send'),
     path('upload/', SimpleUpload),
     path('upload64/', UploadView.as_view()),
     path('sample/', SampleView.as_view()),

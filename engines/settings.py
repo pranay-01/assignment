@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-zm^5jbqs!y3@p1*s7ju)wl*$+miq_)*_sco=t@%n_&blyd1f=_'
 
-KEY = 'I6Y4fjVy7xdSrbjK5eKYQwDed5l0-MbGx29xvS1nEKQ='
+#KEY = 'I6Y4fjVy7xdSrbjK5eKYQwDed5l0-MbGx29xvS1nEKQ='
 
 SECRET = 'idontknow'
 
@@ -63,8 +63,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 3,
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
+
+        'rest_framework.authentication.TokenAuthentication',
+        #'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+
     ],
 }
 

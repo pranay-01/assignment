@@ -18,12 +18,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 import debug_toolbar
+from rest_framework.authtoken import views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('vehicles/', include('vehicles.urls')),
-    path('demos/', include('demos.urls'))
+    path('demos/', include('demos.urls')),
+    path('api-token-auth/', views.obtain_auth_token),
+
 
 ]
 
