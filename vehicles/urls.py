@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from django.urls import path, include
-from .views import (ManufacturerViewset,
+from .views import (Simple,
+                    ManufacturerViewset,
                     OwnerViewset,
                     DisplayPlaceViewset,
                     CarViewset,
@@ -9,6 +10,7 @@ from .views import (ManufacturerViewset,
                     MultiViewset,
                     MultiCreate,
                     SleepView,
+                    ScenarioOne,
                     ScenarioThree,
                     ScenarioTwo,
                     ScenarioSix,
@@ -20,7 +22,7 @@ from .views import (ManufacturerViewset,
 router = DefaultRouter()
 route = SimpleRouter()
 
-
+router.register(r'simple', Simple)
 router.register(r'owners', OwnerViewset)
 router.register(r'manufacturers', ManufacturerViewset)
 router.register(r'displayplaces', DisplayPlaceViewset)
@@ -38,10 +40,12 @@ urlpatterns = [
     path('', include(route.urls)),
     path('rest-auth/', include('rest_auth.urls')),
     path('multi/',  MultiCreate),
-    path('sleep/<int:id>', SleepView),
+    path('sleep/', SleepView.as_view()),
+    path('scenario1/', ScenarioOne.as_view()),
     path('scenario2/', ScenarioTwo.as_view()),
     path('scenario3/', ScenarioThree.as_view()),
     path('scenario6/', ScenarioSix.as_view()),
     path('scenario7/', ScenarioSeven.as_view()),
     path('scenario8/', ScenarioEight.as_view()),
+
 ]

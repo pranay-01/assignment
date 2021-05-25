@@ -47,7 +47,7 @@ class UploadView(APIView):
 @csrf_exempt
 def Formview(request):
 
-    if request.POST.get('acc') and request.POST.get('money'):
+    if request.method == 'POST':
         bank = Bank()
         bank.acc_name = request.POST.get('accn')
         bank.acc_no = request.POST.get('acc')
@@ -60,7 +60,7 @@ def Formview(request):
 def Autoview(request):
 
     return render(request, 'autoform.html')
-
+@csrf_exempt
 def Auto_send(request):
         acc_name = request.POST.get('acc_name', None)
         acc_no = request.POST.get('acc_no', None)
@@ -154,21 +154,23 @@ class ScenarioTen(APIView):
     def post(self, request):
 
         keys = request.data['key']
-        l=len(keys)
-        mid=l//2
-        f_half=[]
-        s_half=[]
+        mid=len(keys)//2
+        res=[]
         f_half= keys[:mid]
         s_half=keys[mid:]
-        #for each in f_half:
-        if DemoModel.objects.filter(id=907).exists():
-            x=DemoModel.objects.get(id=907)
-            x.delete()
+        for each in keys:
+            if each in f_half and DemoModel.objects.filter(id=each).exists():
+                res.append(each)
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM demos_demomodel WHERE id = '%s'",[each])
+            elif each in s_half and DemoModel.objects.filter(id=each).exists():
+                res.append(each)
+                DemoModel.objects.get(id=each).delete()
 
-
-        return Response({
-            'mesg': 'Intelligent Deletion'
-        })
+        return Response([
+            {'mesg': 'Different Deletion'},
+            {'deleted ids': each},
+        ])
 
 
 

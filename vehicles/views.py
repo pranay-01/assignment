@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from time import sleep
+from django.db.models import Q
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes, APIView
@@ -107,38 +108,60 @@ class MultiViewset(ObjectMultipleModelAPIViewSet):
 
 #-------------------------------------TRANSACTIONS------------------------------#
 
+
 @transaction.atomic
 @api_view(['GET','POST'])
 def MultiCreate(request):
-    d1=DisplayPlace.objects.get(area='Toronto')
+    d1=DisplayPlace.objects.get(area='Seattle')
 
 
-    Manufacturer.objects.create(name='Ferrari', origin='Italy')
-    Car.objects.create(model_name='Aventador', model_num='30', color='Orange', gears=6, category='supersport', owner=request.user, display=d1, is_dct=True)
-    DisplayPlace.objects.create(area='Malaysia')
-    Bike.objects.create(model_name='Ninja H2', model_num=22, color='Green', gears=6, type='supersport', owner=request.user, tubeless_tyres=True)
+    Manufacturer.objects.create(name='Maruti', origin='India')
+    Car.objects.create(model_name='Hurracan', model_num='31', color='Blue', gears=6, category='supersport', owner=request.user, display=d1, is_dct=True)
+    DisplayPlace.objects.create(area='California')
+    Bike.objects.create(model_name='Street Twin', model_num=24, color='ironstone', gears=6, type='cruiser', owner=request.user, tubeless_tyres=True)
+    return Response({"message" : "Multi Creation"})
 
-    return Response({"message" : "Creation Successful!"})
 
 
-@transaction.atomic
-@api_view(['GET', 'PUT'])
-def SleepView(request, id):
+class SleepView(APIView):
 
-    if id:
-        t= Car.objects.get(id=id)
-        print('Beginning Sleep   ' + t.model_name)
-        sleep(10)
-        print('Woke Up')
-        t.gears = 8
-        t.save()
-        print(t.gears)
-        return Response({'message' : 'Updated Successfully'})
-
-    return Response({'message' : 'Invalid ID'})
+    @transaction.atomic
+    def get(self, request):
+        pk = request.query_params.get('id')
+        if Car.objects.filter(id=pk).exists():
+            t = Car.objects.get(id=pk)
+            print('Beginning Sleep   ' + t.model_name)
+            sleep(10)
+            print('Woke Up')
+            t.gears = 8
+            t.save()
+            print(t.gears)
+            return Response({'message': 'Updated Successfully'})
+        return Response({'message': 'Invalid ID'})
 
 
 # ___________________ORM VIEWS_____________________#
+
+class ScenarioOne(APIView):
+
+    def get(self, request, format=None):
+        num = request.query_params.get('id')
+        name= request.query_params.get('name')
+        if name and num:
+            sd = Bike.objects.select_related('owner').filter(Q(id=num) | Q(model_name__icontains=name))
+        elif num:
+           sd = Bike.objects.select_related('owner').filter(id=num)
+        else:
+           sd = Bike.objects.select_related('owner').filter(model_name__icontains=name)
+        serializer = BikeSerializer(sd, many=True)
+
+        for each in sd:
+            print(each.owner.username)
+
+        return Response({
+            'data': serializer.data,
+            'query count': len(connection.queries)
+        })
 
 
 class ScenarioTwo(APIView):
@@ -165,7 +188,7 @@ class ScenarioThree(APIView):
 
 class ScenarioSix(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
 
         for each in Car.objects.all():
             print(each.id,
@@ -181,37 +204,37 @@ class ScenarioSeven(APIView):
 
     def get(self, request, format=None):
 
-        for each in Car.objects.select_related('owner').prefetch_related('manufacturer', 'custom_set').all():
+        #Car.objects.select_related('owner').values_list('id', 'owner__username', 'display__area', 'manufacturer__name', 'custom__model_name')
+        for each in Car.objects.select_related('owner').all():
             print(each.id,
-                  each.custom_set.all(),
-                  each.manufacturer.values_list('name'),
+                  each.custom_set.values_list('model_name', flat=True),
+                  each.manufacturer.values_list('name', flat=True),
                   each.owner.username,
-                  each.display.area)
+                  each.display.area
+                  )
 
         return Response({'Query Count': len(connection.queries)})
 
 
 class ScenarioEight(APIView):
-    # Not implemented completely
-
-    #serializer_class = OnlySerializer
 
     def get(self, request, format=None):
         only_list = Manufacturer.objects.only('id')
-        ser1 = ManufacturerSerializer(only_list)
-        serializer = OnlySerializer(only_list)
-        #defer_list = Manufacturer.objects.defer('id')
+        ser1 = OnlySerializer(only_list, many=True)
+        defer_list = Manufacturer.objects.defer('id')
+        ser2 = DeferSerializer(defer_list, many=True)
         val = Manufacturer.objects.values('id')
         val_list = Manufacturer.objects.values_list('id', flat=True)
 
         return Response({
-            "only_list": ser1.data,
+            "only": ser1.data,
             "values_list": val_list,
             "values": val,
+            "defer": ser2.data
         })
 
 
-class ScenarioEleven(viewsets.ReadOnlyModelViewSet):
+class ScenarioEleven(viewsets.ModelViewSet):
 
 
     def list(self, request, *args, **kwargs):
@@ -234,4 +257,10 @@ class ScenarioEleven(viewsets.ReadOnlyModelViewSet):
 
             return Response({'mesg': 'Invalid ID'})
 
+#--------------------------------------------TESTING------------------------------------#
+
+class Simple(viewsets.ReadOnlyModelViewSet):
+
+    serializer_class = BikeSerializer
+    queryset = Bike.objects.filter(model_name__startswith='T')
 

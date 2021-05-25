@@ -33,7 +33,8 @@ class DemoModel(models.Model):
         return self.txt
 
     def del_mesg(sender, **kwargs):
-        print('OOPS, Object DELEted')
+        print('Deletion done, You are from Second half')
+
 
 post_delete.connect(sender=DemoModel, receiver=DemoModel.del_mesg)
 
