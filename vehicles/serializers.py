@@ -27,6 +27,13 @@ class BikeSerializer(serializers.ModelSerializer):
         model = Bike
         fields = '__all__'
 
+    def validate_gears(self, value):
+
+        if(value>6):
+            raise serializers.ValidationError('Bike with these many gears does not exist')
+        return value
+
+
 class ManufacturerSerializer(serializers.ModelSerializer):
 
     class Meta:

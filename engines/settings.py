@@ -63,10 +63,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 3,
     'DEFAULT_AUTHENTICATION_CLASSES': [
-
         'rest_framework.authentication.TokenAuthentication',
         #'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
 
     ],
 }
@@ -130,12 +129,12 @@ CACHEOPS_DEFAULTS = {
     'timeout': 60*60
 }
 
-CACHEOPS = {
-    'vehicles.displayplace': {'ops': 'all'},
-    'vehicles.manufacturer': {'ops': 'all'},
-    'vehicles.custom': {'ops': 'all'},
-
-}
+#CACHEOPS = {
+#    'vehicles.displayplace': {'ops': 'all'},
+#    'vehicles.manufacturer': {'ops': 'all'},
+#    'vehicles.custom': {'ops': 'all'},
+#
+#}
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 

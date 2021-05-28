@@ -32,11 +32,11 @@ class DemoModel(models.Model):
     def __str__(self):
         return self.txt
 
-    def del_mesg(sender, **kwargs):
-        print('Deletion done, You are from Second half')
+def del_mesg(sender, **kwargs):
+    print('Deletion done, You are from Second half')
 
 
-post_delete.connect(sender=DemoModel, receiver=DemoModel.del_mesg)
+post_delete.connect(sender=DemoModel, receiver=del_mesg)
 
 
 

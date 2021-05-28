@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
 from .models import Bank, Sample, DemoModel, FileUpload
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -11,6 +12,7 @@ from django.utils.crypto import get_random_string
 from django.db.models.signals import post_delete
 from django.db import connection
 import time, base64
+from vehicles.models import DisplayPlace
 from django.core.files.storage import FileSystemStorage
 
 
@@ -44,7 +46,7 @@ class UploadView(APIView):
 
 #---------------CSRF-------------------------#
 
-@csrf_exempt
+#@csrf_exempt
 def Formview(request):
 
     if request.method == 'POST':
@@ -90,13 +92,9 @@ class ScenarioFour(APIView):
 
     def get(self, request, format=None):
 
-        l=[]
-        for i in range(1000):
-            l.append(get_random_string(5, allowed_chars='pranay'))
+        entries=[]
 
-        entries = [DemoModel(txt=val) for val in l]
-
-        DemoModel.objects.bulk_create(entries)
+        DemoModel.objects.bulk_create([DemoModel(txt=get_random_string(5, allowed_chars='vizag')) for i in range(1000)])
 
         return Response({'mesg': 'Created Random Entries'})
 
@@ -112,11 +110,10 @@ class ScenarioFive(APIView):
         keys = request.data['key']
         flag=0
         start= time.time()
-        for each in Sample.objects.all().iterator():
-            if each.exp in keys:
-                flag+=1
+        flag = Sample.objects.filter(id__in=keys).count()
         end= time.time()
         diff = end-start
+        print(connection.queries)
         return Response({'Matching Rows': flag,
                          'time': diff})
 
@@ -204,3 +201,18 @@ class Example(APIView):
 
         return Response({'mesg': request.data['name'],
                         'info': l[0]})
+
+
+class Create_User(APIView):
+    def post(self, request):
+
+        un = request.data['username']
+        pw = request.data['password']
+
+        if un and pw:
+
+            User.objects.create(username=un, password=pw)
+
+        return Response({
+            'mesg': 'Creation of a User',
+        })

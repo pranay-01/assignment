@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from time import sleep
 from django.db.models import Q
+import functools, operator
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes, APIView
@@ -19,6 +20,7 @@ from .serializers import OwnerSerializer, ManufacturerSerializer, DisplayPlaceSe
 from rest_framework.response import Response
 from django.db.models import F
 from django.db import connection
+from .cust_auth import MyAuth
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
@@ -27,7 +29,7 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class OwnerViewset(viewsets.ModelViewSet):
     serializer_class = OwnerSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['id', 'username']
     ordering_fields = ['id', 'username']
@@ -36,6 +38,7 @@ class OwnerViewset(viewsets.ModelViewSet):
 
 class ManufacturerViewset(viewsets.ModelViewSet):
     serializer_class = ManufacturerSerializer
+    authentication_classes = [MyAuth]
     permission_classes = [permissions.IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['name', 'origin', 'id']
@@ -45,8 +48,9 @@ class ManufacturerViewset(viewsets.ModelViewSet):
 
 class DisplayPlaceViewset(viewsets.ModelViewSet):
     serializer_class = DisplayPlaceSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    authentication_classes = [MyAuth]
+    #permission_classes = [permissions.IsAuthenticated]
+    #filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['area', 'id']
     ordering_fields = ['area', 'id']
     search_fields = ['area', 'id']
@@ -56,7 +60,7 @@ class DisplayPlaceViewset(viewsets.ModelViewSet):
 class CarViewset(viewsets.ModelViewSet):
     serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    #filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['model_name', 'model_num', 'color', 'gears', 'category', 'is_dct']
     ordering_fields = ['model_name', 'model_num', 'color', 'gears', 'category', 'is_dct']
     search_fields = ['model_name', 'model_num', 'color', 'gears', 'category', 'is_dct']
@@ -65,9 +69,9 @@ class CarViewset(viewsets.ModelViewSet):
 class BikeViewset(viewsets.ModelViewSet):
     serializer_class = BikeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    #filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
-    ordering_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
+   #     ordering_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
     search_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
     queryset = Bike.objects.select_related('owner').all()
 
@@ -142,17 +146,16 @@ class SleepView(APIView):
 
 # ___________________ORM VIEWS_____________________#
 
+
 class ScenarioOne(APIView):
 
-    def get(self, request, format=None):
-        num = request.query_params.get('id')
-        name= request.query_params.get('name')
-        if name and num:
-            sd = Bike.objects.select_related('owner').filter(Q(id=num) | Q(model_name__icontains=name))
-        elif num:
-           sd = Bike.objects.select_related('owner').filter(id=num)
-        else:
-           sd = Bike.objects.select_related('owner').filter(model_name__icontains=name)
+    def get(self, request):
+        before=len(connection.queries)
+        l= Q()
+        for each in request.query_params:
+            l |= Q(**{each: request.query_params.get(each)})
+
+        sd = Bike.objects.select_related('owner').prefetch_related('manufacturer').filter(l)
         serializer = BikeSerializer(sd, many=True)
 
         for each in sd:
@@ -160,7 +163,7 @@ class ScenarioOne(APIView):
 
         return Response({
             'data': serializer.data,
-            'query count': len(connection.queries)
+            'query count': len(connection.queries)- before
         })
 
 
@@ -168,19 +171,18 @@ class ScenarioTwo(APIView):
 
     def get(self, request, format=None):
         mod_ids=[]
-        mod_ids+=(Custom.objects.values_list(F('id')*100, flat=True))
+        mod_ids+=(Custom.objects.values_list(F('id')+100, flat=True))
         return Response([
             {'Message': 'Modified Ids for Custom Model'},
-            {'Modified_ID': mod_ids}
+            {'Modified_ID': Custom.objects.values_list(F('id')+100, flat=True)}
         ])
 
 
 class ScenarioThree(APIView):
 
     def get(self, request, format=None):
-        ids=[]
         combine = []
-        for each in Car.objects.all():
+        for each in Car.objects.prefetch_related('custom_set').all():
             combine.append({'id': each.id, 'Count Of Related Objects': each.custom_set.all().count()})
 
         return Response(combine)
@@ -263,4 +265,5 @@ class Simple(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = BikeSerializer
     queryset = Bike.objects.filter(model_name__startswith='T')
+
 

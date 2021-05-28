@@ -3,12 +3,13 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
+from rest_framework.authtoken.models import Token
 from django.core.exceptions import ValidationError
 
 
 class AutoTime(models.Model):
-    created = models.DateTimeField(auto_now_add=True, auto_now=False, blank=False)
-    modified = models.DateTimeField(auto_now=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, auto_now=False)
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
@@ -86,16 +87,6 @@ class Bike(Vehicle):
     tubeless_tyres = models.BooleanField()
 
 
-    def clean(self):
-        if(self.gears > 6):
-            raise ValidationError("Bike with these many gears does not exist")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-
-        super(Bike, self).save(*args, **kwargs)
-
-
 
 class Custom(Vehicle):
     inspired = models.ForeignKey(Car, on_delete=models.CASCADE)
@@ -133,3 +124,12 @@ class Restaurant(Place):
 class Street(Place):
 
     houses = models.PositiveSmallIntegerField()
+
+
+
+
+
+@receiver(post_save, sender=User)
+def create_user(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
