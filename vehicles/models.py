@@ -97,7 +97,7 @@ class Custom(Vehicle):
 
 @receiver(post_save,  sender= DisplayPlace)
 @receiver(post_save,  sender= Manufacturer)
-@receiver(post_save, sender= Custom)
+@receiver(post_save,  sender= Custom)
 @receiver(post_delete, sender= DisplayPlace)
 @receiver(post_delete, sender= Manufacturer)
 @receiver(post_delete, sender= Custom)

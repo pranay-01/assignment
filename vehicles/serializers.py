@@ -59,6 +59,6 @@ class OnlySerializer(serializers.ModelSerializer):
         fields= ('id',)
 
 class DeferSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= Manufacturer
-        fields= ('name','origin', 'created', 'modified')
+  class Meta:
+      model= Manufacturer
+      fields= ('name','origin', 'created', 'modified')

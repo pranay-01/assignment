@@ -100,7 +100,7 @@ class MultiViewset(ObjectMultipleModelAPIViewSet):
             'serializer_class': DisplayPlaceSerializer,
         },
         {
-            'queryset': Custom.objects.all(),
+            'queryset': Custom.objects.select_related('inspired').all(),
             'serializer_class': CustomSerializer,
         }
     ]
@@ -206,11 +206,11 @@ class ScenarioSeven(APIView):
 
     def get(self, request, format=None):
 
-        #Car.objects.select_related('owner').values_list('id', 'owner__username', 'display__area', 'manufacturer__name', 'custom__model_name')
-        for each in Car.objects.select_related('owner').all():
+        #Car.objects.select_related('owner','display').prefetch_related('manufacturer','custom_set').values_list('id', 'owner__username', 'display__area', 'manufacturer__name', 'custom__model_name')
+        for each in Car.objects.select_related('owner','display').prefetch_related('manufacturer','custom_set').all():
             print(each.id,
-                  each.custom_set.values_list('model_name', flat=True),
-                  each.manufacturer.values_list('name', flat=True),
+                  each.custom_set.all(),
+                  each.manufacturer.all(),
                   each.owner.username,
                   each.display.area
                   )
@@ -224,7 +224,7 @@ class ScenarioEight(APIView):
         only_list = Manufacturer.objects.only('id')
         ser1 = OnlySerializer(only_list, many=True)
         defer_list = Manufacturer.objects.defer('id')
-        ser2 = DeferSerializer(defer_list, many=True)
+        ser2 = ManufacturerSerializer(defer_list, many=True)
         val = Manufacturer.objects.values('id')
         val_list = Manufacturer.objects.values_list('id', flat=True)
 

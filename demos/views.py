@@ -130,6 +130,7 @@ class ScenarioNine(APIView):
 
         keys = request.data['key']
         for i in range(len(keys)):
+
             if(len(keys[i]) == 2):
                 temp = DemoModel.objects.get(id=keys[i]['id'])
                 temp.txt = keys[i]['name']
@@ -167,7 +168,7 @@ class ScenarioTen(APIView):
 
         return Response([
             {'mesg': 'Different Deletion'},
-            {'deleted ids': each},
+            {'deleted ids': res},
         ])
 
 
