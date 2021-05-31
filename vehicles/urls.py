@@ -30,7 +30,6 @@ router.register(r'bikes', BikeViewset)
 router.register(r'cars', CarViewset)
 router.register(r'customs', CustomViewset)
 router.register(r'multiple', MultiViewset, basename= 'multiple')
-#route.register(r'scenario1', ScenarioOne, basename='scenario1')
 route.register(r'scenario11', ScenarioEleven, basename='scenario11')
 
 

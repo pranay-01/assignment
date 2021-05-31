@@ -75,14 +75,15 @@ def Auto_send(request):
 #-----------------------MiDDLEWARE------------------------------#
 
 
-class SampleView(APIView):
+class Middleware(APIView):
     def get(self, request, format=None):
 
         return Response({'Mesg': 'GET'})
 
     def post(self,request):
 
-        return Response({'Mesg': 'darknight'})
+
+        return Response({'Mesg': 'Mask'})
 
 
 

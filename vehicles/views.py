@@ -49,7 +49,7 @@ class ManufacturerViewset(viewsets.ModelViewSet):
 class DisplayPlaceViewset(viewsets.ModelViewSet):
     serializer_class = DisplayPlaceSerializer
     authentication_classes = [MyAuth]
-    #permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     #filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['area', 'id']
     ordering_fields = ['area', 'id']
@@ -71,7 +71,7 @@ class BikeViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     #filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     filter_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
-   #     ordering_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
+    ordering_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
     search_fields = ['model_name', 'model_num', 'color', 'gears', 'type', 'tubeless_tyres']
     queryset = Bike.objects.select_related('owner').all()
 
